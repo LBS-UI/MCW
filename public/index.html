@@ -1094,6 +1094,115 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
 .intro__gate-hint { margin: 4px 0 0; font-size: .78rem; color: rgba(255,251,234,.6); }
 </style>
 
+
+<!-- MAINTENANCE MODE -->
+<script>
+  const MAINTENANCE_MODE = true;
+</script>
+
+<div id="maintenance-page" style="display: none;">
+  <style>
+    #maintenance-page {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: #0b0b12;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+
+    #maintenance-page .maintenance-content {
+      max-width: 500px;
+    }
+
+    #maintenance-page .maintenance-icon {
+      font-size: 70px;
+      margin-bottom: 25px;
+      animation: maintenance-float 3s ease-in-out infinite;
+    }
+
+    #maintenance-page h1 {
+      color: #f5b942;
+      font-size: clamp(30px, 6vw, 44px);
+      margin-bottom: 18px;
+    }
+
+    #maintenance-page p {
+      color: #b9bac7;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+
+    #maintenance-page .maintenance-status {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 10px 18px;
+      border: 1px solid #383847;
+      border-radius: 30px;
+      color: #f5b942;
+      font-size: 13px;
+    }
+
+    #maintenance-page .maintenance-footer {
+      margin-top: 50px;
+      color: #686879;
+      font-size: 12px;
+    }
+
+    @keyframes maintenance-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #maintenance-page .maintenance-icon {
+        animation: none;
+      }
+    }
+  </style>
+
+  <div class="maintenance-content">
+    <div class="maintenance-icon" aria-hidden="true">⚙️</div>
+
+    <h1>Under Maintenance</h1>
+
+    <p>
+      We're currently upgrading our website
+      to provide you with a better experience.
+    </p>
+
+    <p>
+      Please check back soon. Thank you
+      for your patience and understanding!
+    </p>
+
+    <div class="maintenance-status">
+      ● Maintenance in progress
+    </div>
+
+    <div class="maintenance-footer">
+      &copy; <span id="maintenance-year"></span>
+      Your Website. All rights reserved.
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById("maintenance-year").textContent =
+    new Date().getFullYear();
+
+  if (MAINTENANCE_MODE) {
+    document.getElementById("maintenance-page").style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+</script>
+<!-- END MAINTENANCE MODE -->
+
 </head>
 <body class="text-white antialiased">
 

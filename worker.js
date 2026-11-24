@@ -305,7 +305,7 @@ async function requireAdmin(request, env) {
   if (!env.DB) return { error: "D1 database is not bound" };
   const row = await env.DB.prepare("SELECT id, username, role FROM users WHERE session_token = ?").bind(token).first();
   if (!row) return { error: "Saved token was not found. Log out and log in again." };
-  if (!["Admin", "Developer"].includes(row.role)) return { error: "This account is " + row.role + ", not Admin or Developer." };
+  if (!["Admin", "Developer", "Owner"].includes(row.role)) return { error: "This account is " + row.role + ", not Admin, Developer, or Owner." };
   return row;
 }
 async function sha256(value) {
@@ -378,7 +378,9 @@ async function handleMembers(request, env, url) {
       const key = decodeURIComponent(url.pathname.split("/").pop() || "").trim();
       const row = await env.DB.prepare("SELECT member_number, display_name, club_role, status, visibility FROM memberships WHERE member_number = ? OR public_id = ?").bind(key, key).first();
       if (!row || row.visibility === "hidden") return json(404, { error: "Member not found" });
-      return json(200, { username: row.display_name, display_name: row.display_name, role: row.club_role, club_role: row.club_role, status: row.status, member_number: row.member_number, avatar: "images/logo.jpg" });
+      const role = row.club_role || "Member";
+      const windowType = /owner/i.test(role) ? "owner" : /advisor/i.test(role) ? "advisor" : /exclusive/i.test(role) ? "exclusive" : "member";
+      return json(200, { username: row.display_name, display_name: row.display_name, role: role, club_role: role, status: row.status, member_number: row.member_number, window: windowType, avatar: "images/logo.jpg" });
     }
     const admin = await requireAdmin(request, env);
     if (admin.error) return json(401, { error: admin.error });
@@ -406,7 +408,7 @@ async function handleMembers(request, env, url) {
     const body = await request.json().catch(function () { return {}; });
     if (url.pathname === "/api/members/register") {
       const name = String(body.display_name || "").trim().slice(0, 80);
-      const role = ["Member", "Developer", "Moderator", "Admin"].includes(body.club_role) ? body.club_role : "Member";
+      const role = ["Member", "Exclusive", "Advisor", "Owner", "Developer", "Moderator", "Admin"].includes(body.club_role) ? body.club_role : "Member";
       if (name.length < 2) return json(400, { error: "Name is required" });
       const number = memberNumber();
       const token = randomToken();
@@ -417,7 +419,7 @@ async function handleMembers(request, env, url) {
     }
     if (url.pathname === "/api/members/update") {
       const name = String(body.display_name || "").trim().slice(0, 80);
-      const role = ["Member", "Developer", "Moderator", "Admin"].includes(body.club_role) ? body.club_role : "";
+      const role = ["Member", "Exclusive", "Advisor", "Owner", "Developer", "Moderator", "Admin"].includes(body.club_role) ? body.club_role : "";
       if (!body.member_number || name.length < 2 || !role) return json(400, { error: "Name, role, and member number are required" });
       await env.DB.prepare("UPDATE memberships SET display_name = ?, club_role = ?, updated_at = ? WHERE member_number = ?").bind(name, role, new Date().toISOString(), body.member_number).run();
       await writeMembershipAudit(env, admin.username, "update_member", null, body.member_number + " -> " + role);

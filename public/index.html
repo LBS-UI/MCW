@@ -1025,9 +1025,9 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
             overflow-y: auto;
             display: none;
         }
-        #qr-profile-page.is-active {
-            display: block;
-        }
+        #qr-profile-page[data-kind="exclusive"] .qr-card-container { border-color: #FFE600; box-shadow: 0 0 50px rgba(255,230,0,.25); }
+        #qr-profile-page[data-kind="owner"] .qr-card-container { border-color: #FFD700; box-shadow: 0 0 60px rgba(255,215,0,.35); }
+        #qr-profile-page[data-kind="advisor"] .qr-card-container { border-color: #f5c344; }
         .qr-card-container {
             background: rgba(10, 8, 3, 0.9);
             border: 2px solid rgba(255, 215, 0, 0.3);
@@ -1122,8 +1122,8 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
                 <i class="fa-solid fa-check-circle text-4xl text-[#FFD700]"></i>
             </div>
             
-            <h2 class="text-2xl font-display font-bold text-white mb-1">Member Verified</h2>
-            <p class="text-sm text-gray-400 mb-6">This digital ID is officially registered.</p>
+            <h2 id="verify-heading" class="text-2xl font-display font-bold text-white mb-1">Member Verified</h2>
+            <p id="verify-note" class="text-sm text-gray-400 mb-6">This digital ID is officially registered.</p>
             
             <!-- Scanned User Card -->
             <div class="relative inline-block mb-4">
@@ -1273,6 +1273,11 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
 
                 <!-- Actions -->
                 <div class="flex items-center gap-3">
+                    <div id="live-visits" class="hidden items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-400/40 bg-black/40 text-xs font-bold">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>LIVE</span>
+                        <span id="live-visit-count">0</span>
+                    </div>
                     <div id="nav-user-section">
                         <button onclick="showLoginModal()" class="text-xs font-bold px-4 py-2 rounded-full border border-[#FFD700]/50 text-[#FFD700] hover:bg-[#FFD700]/10 transition">Log in</button>
                     </div>
@@ -1734,7 +1739,7 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
             </form>
                 <div class="grid md:grid-cols-3 gap-2">
                     <input id="member-name" placeholder="Display name" class="input-gold px-4 py-3 rounded-2xl" required>
-                    <select id="member-role" class="input-gold px-4 py-3 rounded-2xl"><option>Member</option><option>Developer</option><option>Moderator</option><option>Admin</option></select>
+                    <select id="member-role" class="input-gold px-4 py-3 rounded-2xl"><option>Member</option><option>Exclusive</option><option>Advisor</option><option>Owner</option><option>Developer</option><option>Moderator</option><option>Admin</option></select>
                     <button class="btn-gold rounded-2xl">Issue membership</button>
                 </div>
             </form>
@@ -2522,7 +2527,7 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
             return currentUser && (currentUser.role === "Admin" || currentUser.role === "Developer" || currentUser.role === "Editor");
         }
         function hasFullAccess() {
-            return currentUser && (currentUser.role === "Admin" || currentUser.role === "Developer");
+            return currentUser && ["Admin", "Developer", "Owner"].includes(currentUser.role);
         }
 
         let adminRefreshInterval = null;
@@ -2890,6 +2895,11 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
             if (profile) profile.textContent = count + " active visitor" + (count === 1 ? "" : "s");
             const admin = document.getElementById("active-visitors");
             if (admin) admin.textContent = count;
+            const live = document.getElementById("live-visit-count");
+            const badge = document.getElementById("live-visits");
+            if (live) live.textContent = String(count);
+            if (badge && currentUser && ["Admin", "Developer", "Owner"].includes(currentUser.role)) badge.classList.remove("hidden");
+            if (badge && currentUser && ["Admin", "Developer", "Owner"].includes(currentUser.role)) badge.classList.add("flex");
             return count;
         }
         async function memberApi(path, body) {
@@ -2964,7 +2974,9 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
             if (!id) { id = "v-" + Date.now(); sessionStorage.setItem("mm_visitor", id); }
             const beat = function () { fetch("/api/presence", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: id, label: currentUser ? currentUser.username : "Visitor" }) }).catch(function () {}); };
             beat();
+            refreshVisitorCount();
             setInterval(beat, 20000);
+            setInterval(refreshVisitorCount, 10000);
         }
         async function loadLiveData() {
             try {
@@ -4734,10 +4746,21 @@ async function checkForPublicVerification() {
         };
     }
 
+    const role = user.club_role || user.role || "Member";
+    const kind = user.window || (/owner/i.test(role) ? "owner" : /advisor/i.test(role) ? "advisor" : /exclusive/i.test(role) ? "exclusive" : "member");
+    const copy = {
+        member: ["Member Verified", "This digital ID is officially registered.", "Member"],
+        exclusive: ["Exclusive Member", "This exclusive button-pin ID is officially registered.", "Exclusive"],
+        owner: ["Owner Verified", "Club owner and main developer access confirmed.", "Owner · Main Dev"],
+        advisor: ["Advisor Verified", "This advisor ID is officially registered.", "Advisor"]
+    }[kind];
+    document.getElementById("qr-profile-page").dataset.kind = kind;
+    document.getElementById("verify-heading").textContent = copy[0];
+    document.getElementById("verify-note").textContent = copy[1];
     document.getElementById("verify-avatar").src = user.avatar || "verity-faces/idle.jpg";
     document.getElementById("verify-name").textContent = user.username || user.display_name || "Member";
-    document.getElementById("verify-role").textContent = user.officerRole || user.club_role || user.role || "Member";
-    document.getElementById("verify-id").textContent = verifyToken;
+    document.getElementById("verify-role").textContent = copy[2];
+    document.getElementById("verify-id").textContent = user.member_number || verifyToken;
 }
 
 function closePublicPage() {

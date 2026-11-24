@@ -4533,9 +4533,7 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
 
     </script>
 
-
-
-
+<script>
 // --- SCROLL ANIMATIONS OBSERVER ---
 document.addEventListener("DOMContentLoaded", function() {
     const observer = new IntersectionObserver((entries) => {
@@ -4620,7 +4618,7 @@ function closePublicPage() {
   if (!orb || !img) return;
 
   /* ---------------- tuning ---------------- */
-  const MAX_OFFSET  = 4;      // px the image shifts inside the orb (simulate looking)
+  const MAX_OFFSET  = 10;      // px the image shifts inside the orb (simulate looking)
   const IMG_EASE    = 0.20;   // image smoothing
   const AIM_EASE    = 0.15;   // how fast the "attention point" chases the finger
   const IDLE_EASE   = 0.03;   // slower drift while idling

@@ -6,6 +6,7 @@
   }
   var site = document.getElementById("site");
   if (site) {
+    site.style.display = "none";
     new MutationObserver(function () {
       if (site.classList.contains("live") || site.classList.contains("in")) done();
     }).observe(site, { attributes: true, attributeFilter: ["class"] });
@@ -19,7 +20,9 @@
   document.addEventListener("keydown", function (event) {
     if (event.key === "Escape") done();
   });
-  if (!document.getElementById("skip") && !document.getElementById("mmc-skip")) {
+  var skip = document.getElementById("skip");
+  if (skip) skip.addEventListener("click", done);
+  if (!skip && !document.getElementById("mmc-skip")) {
     var button = document.createElement("button");
     button.id = "mmc-skip";
     button.type = "button";
@@ -28,5 +31,5 @@
     button.addEventListener("click", done);
     document.body.appendChild(button);
   }
-  setTimeout(done, 22000);
+  setTimeout(done, 16000);
 })();

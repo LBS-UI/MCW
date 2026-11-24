@@ -51,6 +51,8 @@
     var src = SCENES[name];
     if (!src) return cleanup();
     hideOldIntro();
+    var loader = document.getElementById("loading-screen");
+    if (loader) loader.style.display = "none";
     document.body.style.overflow = "hidden";
     overlay = document.createElement("div");
     overlay.id = "mmc-intro-overlay";
@@ -59,6 +61,7 @@
     frame.src = src;
     frame.title = "Multimedia Club intro";
     frame.style.cssText = "width:100%;height:100%;border:0;background:#050505";
+    frame.addEventListener("error", cleanup);
     var bar = document.createElement("div");
     bar.style.cssText = "position:absolute;right:16px;bottom:16px;display:flex;gap:8px;z-index:2";
     function button(label, action) {
@@ -76,6 +79,7 @@
     document.body.appendChild(overlay);
     storage(localStorage, "mmc_intro_seen", "1");
     storage(localStorage, "mmc_intro_last", String(Date.now()));
+    setTimeout(cleanup, 18000);
   }
   window.addEventListener("message", function (event) {
     if (event.data && event.data.type === "mmc-intro-done") cleanup();

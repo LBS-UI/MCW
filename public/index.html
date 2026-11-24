@@ -1174,25 +1174,6 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
 </div>
 
 
-<div class="intro" id="intro">
-  <div class="intro__aurora"></div>
-  <div class="intro__grid"></div>
-  <div class="intro__whoosh" id="whooshLine"></div>
-  <div class="intro__ripple" id="ripple0"></div>
-  <div class="intro__ripple" id="ripple1"></div>
-  <div class="intro__ripple" id="ripple2"></div>
-  <div class="intro__shadow" id="introShadow"></div>
-  <div class="intro__logo" id="introLogo"><div class="intro__logo-inner" id="introLogoInner"><img src="verity-faces/idle.jpg" alt="Verity"></div></div>
-  <div class="intro__text">
-    <p class="intro__welcome">Welcome to the Multimedia Club.</p>
-    <p class="intro__name"><img src="images/logo.jpg" alt="Multimedia logo"><span>Multimedia</span></p>
-    <p class="intro__tagline">CREATE • CAPTURE • CONNECT • Collaborated by Verity</p>
-    <button id="introEnter" type="button" class="intro__gate-label" style="display:none;margin-top:1.2rem;pointer-events:auto;border:1px solid rgba(253,224,71,.4);border-radius:999px;padding:12px 22px;background:#fbbf24;color:#0a0803;">Click to enter multimedia</button>
-  </div>
-  <div class="intro__gate" id="introGate"><div class="intro__gate-inner"><p class="intro__gate-label">Click to enter multimedia</p><p class="intro__gate-hint" id="introGateHint">Click anywhere to start</p></div></div>
-</div>
-
-
 <!-- IMPROVED CINEMATIC LOADING SCREEN -->
     <button id="notify-float" onclick="enableClubNotifications()" class="notify-highlight px-4 py-3 rounded-full border border-[#FFD700] text-[#FFD700] font-semibold">Enable notifications</button>
     <div id="loading-screen" class="fixed inset-0 z-[999] flex items-center justify-center bg-[#0a0803] overflow-hidden">
@@ -4555,144 +4536,6 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
 
 
 
-<script>
-(function () {
-  var CFG = { gravity: 3200, restitution: 0.62, settleThreshold: 260, minBounces: 4, fallStartFactor: 1.55, idleBobFreq: 2.2, idleBobAmp: 3 };
-  var root = document.getElementById("intro");
-  var gate = document.getElementById("introGate");
-  var gateHint = document.getElementById("introGateHint");
-  var logo = document.getElementById("introLogo");
-  var logoInner = document.getElementById("introLogoInner");
-  var shadow = document.getElementById("introShadow");
-  var whooshLine = document.getElementById("whooshLine");
-  var rippleEls = [document.getElementById("ripple0"), document.getElementById("ripple1"), document.getElementById("ripple2")];
-  if (!root || !logo) return;
-  var loader = document.getElementById("loading-screen");
-  if (loader) loader.style.display = "none";
-  function setFace(mode) {
-    var img = logo.querySelector("img");
-    if (!img) return;
-    if (mode === "talking") img.src = "verity-faces/talking.jpg";
-    else if (mode === "wincing") img.src = "verity-faces/wincing.jpg";
-    else img.src = "verity-faces/idle.jpg";
-  }
-  function playLine(text, rate) {
-    var startResolve, endResolve;
-    var start = new Promise(function (r) { startResolve = r; });
-    var end = new Promise(function (r) { endResolve = r; });
-    if (!window.speakVerity) { startResolve(); endResolve(); return { start: start, end: end }; }
-    gateHint.textContent = "Generating...";
-    window.speakVerity(text, { rate: rate || 1, onStart: function () { setFace("talking"); gateHint.textContent = ""; startResolve(); } }).then(function () { setFace("idle"); startResolve(); endResolve(); }, function () { setFace("idle"); startResolve(); endResolve(); });
-    return { start: start, end: end };
-  }
-  function playPlop() {
-    try {
-      var ctx = new (window.AudioContext || window.webkitAudioContext)();
-      var osc = ctx.createOscillator();
-      var gain = ctx.createGain();
-      osc.frequency.setValueAtTime(180, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(55, ctx.currentTime + 0.14);
-      gain.gain.setValueAtTime(0.4, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-      osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.22);
-    } catch (e) {}
-  }
-  var phase = "idle", y = 0, vy = 0, rot = 0, sx = 1, sy = 1, startY = 0, fallDistance = 1, bounceCount = 0, whooshed = false, running = false, startTime = 0, lastTime = 0;
-  function measure() {
-    var vh = window.innerHeight;
-    var logoSize = logo.offsetWidth || 120;
-    startY = -vh * CFG.fallStartFactor;
-    if (startY > -(vh + logoSize)) startY = -(vh + logoSize) - 80;
-    fallDistance = Math.abs(startY);
-    y = startY;
-  }
-  function render() {
-    logo.style.transform = "translate(-50%, -100%) translateY(" + y + "px)";
-    logoInner.style.transform = "rotate(" + rot + "deg) scale(" + sx + ", " + sy + ")";
-    var prox = 1 - Math.min(1, Math.abs(y) / fallDistance);
-    shadow.style.opacity = String(0.05 + prox * 0.48);
-    shadow.style.transform = "translate(-50%, -50%) scale(" + (0.3 + prox * 1.05) + ")";
-  }
-  function flash(i) {
-    var el = rippleEls[i];
-    if (!el) return;
-    el.style.animation = "none";
-    void el.offsetWidth;
-    el.style.animation = "ripple .7s ease both";
-  }
-  function onImpact() {
-    setFace("wincing");
-    if (bounceCount === 0) { sx = 1.42; sy = 0.62; playPlop(); flash(0); playLine("oof", 1); }
-    else { sx = 1.24; sy = 0.8; if (bounceCount < 3) flash(bounceCount); }
-  }
-  function settle() {
-    phase = "settled";
-    vy = 0; y = 0; sx = 1; sy = 1; rot = 0;
-    var hello = playLine("helloo", 1);
-    hello.start.then(function () {
-      root.classList.add("intro--text");
-      var enter = document.getElementById("introEnter");
-      if (enter) {
-        enter.style.display = "inline-block";
-        enter.onclick = function () {
-          root.classList.add("intro--done");
-          setTimeout(function () {
-            if (root.parentNode) root.remove();
-            if (window.offerVerityTour) window.offerVerityTour();
-          }, 800);
-        };
-      }
-    });
-  }
-  function loop(now) {
-    if (!running) return;
-    if (!startTime) { startTime = now; lastTime = now; }
-    var dt = Math.min(0.05, (now - lastTime) / 1000);
-    lastTime = now;
-    if (phase === "falling") {
-      vy += CFG.gravity * dt;
-      y += vy * dt;
-      if (!whooshed && (window.innerHeight * 0.58 + y) > 0) {
-        whooshed = true;
-        whooshLine.style.animation = "whoosh-line .55s ease-out both";
-      }
-      if (y >= 0 && vy > 0) {
-        y = 0;
-        onImpact();
-        vy = -vy * CFG.restitution;
-        bounceCount += 1;
-        if (Math.abs(vy) < CFG.settleThreshold && bounceCount >= CFG.minBounces) settle();
-      }
-      var speed = Math.min(1, Math.abs(vy) / 2600);
-      if (vy > 0) { sx = 1 - speed * 0.32; sy = 1 + speed * 0.32; }
-      rot = Math.sin(now * 0.006) * 3.5;
-    } else if (phase === "settled") {
-      y = Math.sin(now * 0.002 * CFG.idleBobFreq) * CFG.idleBobAmp;
-    }
-    render();
-    requestAnimationFrame(loop);
-  }
-  measure();
-  render();
-  function begin() {
-    if (phase !== "idle") return;
-    if (typeof startBGM === "function") startBGM(currentMusicTrack || "welcome");
-    gate.classList.add("intro__gate--hidden");
-    var fall = playLine("AHHHHHH", 0.85);
-    fall.start.then(function () {
-      measure();
-      logo.style.opacity = "1";
-      phase = "falling";
-      y = startY;
-      vy = 0;
-      running = true;
-      requestAnimationFrame(loop);
-    });
-  }
-  gate.addEventListener("click", begin);
-  window.addEventListener("keydown", begin);
-})();
-
 // --- SCROLL ANIMATIONS OBSERVER ---
 document.addEventListener("DOMContentLoaded", function() {
     const observer = new IntersectionObserver((entries) => {
@@ -4768,10 +4611,6 @@ function closePublicPage() {
     // Clean URL
     window.history.replaceState({}, document.title, window.location.pathname);
     
-    // If the intro hasn't been seen yet, show it. Otherwise, show the site.
-    if (document.getElementById('intro') && document.getElementById('intro').style.display === 'none') {
-         document.getElementById('intro').style.display = 'block';
-    }
 }
 
 // --- VERITY CURSOR TRACKING LOGIC ---

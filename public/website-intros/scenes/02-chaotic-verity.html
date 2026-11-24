@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multimedia Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yellow:#FFD60A;
+  --yellow-deep:#FFB300;
+  --ink:#0d0d11;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--ink);
+  color:#fff;
+  font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;
+  overflow-x:hidden;
+}
+body.locked{overflow:hidden;height:100vh}
+
+/* ============ HERO ============ */
+.hero{
+  position:relative;
+  min-height:100vh;
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  padding:40px 24px;
+  overflow:hidden;
+  isolation:isolate;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background:
+    radial-gradient(58% 48% at 50% 46%, rgba(255,214,10,.10), transparent 72%),
+    radial-gradient(46% 42% at 84% 82%, rgba(120,80,255,.12), transparent 72%),
+    radial-gradient(40% 40% at 12% 18%, rgba(0,180,255,.07), transparent 70%);
+  z-index:-1;
+}
+
+.eyebrow{
+  margin:0;
+  font-size:clamp(10px,1.3vw,13px);
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.42);
+  font-weight:500;
+}
+
+.logo{
+  margin:0;
+  font-family:'Archivo Black','Arial Black',sans-serif;
+  font-size:clamp(34px,8.2vw,94px);
+  line-height:.92;
+  letter-spacing:-.025em;
+  text-align:center;
+  text-transform:uppercase;
+  color:#fff;
+  transform-origin:50% 60%;
+  transition:transform .6s cubic-bezier(.2,1.6,.4,1);
+  will-change:transform;
+}
+.logo .dot{color:var(--yellow)}
+.logo.knocked{transform:translate(24px,16px) rotate(-8deg)}
+
+.sub{
+  margin:0;
+  font-size:clamp(13px,1.6vw,17px);
+  color:rgba(255,255,255,.48);
+  text-align:center;
+  max-width:38ch;
+  line-height:1.6;
+}
+
+/* ============ VERITY ============ */
+.verity{
+  position:absolute;
+  left:0;top:0;
+  width:0;height:0;
+  z-index:30;
+  opacity:0;
+  transition:opacity .25s ease;
+  will-change:transform;
+  pointer-events:none;
+}
+.verity-body{
+  position:absolute;
+  left:-48px;top:-48px;
+  width:96px;height:96px;
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 26%,
+    #FFF7AE 0%, #FFD60A 42%, #FFB300 78%, #F09300 100%);
+  box-shadow:
+    inset -9px -13px 24px rgba(170,100,0,.35),
+    inset 7px 9px 20px rgba(255,255,255,.55),
+    0 0 0 6px rgba(255,214,10,.10),
+    0 26px 55px -14px rgba(255,190,0,.6);
+  will-change:transform;
+}
+.verity-body::after{ /* glossy highlight */
+  content:'';
+  position:absolute;
+  left:19px;top:13px;
+  width:28px;height:18px;
+  background:rgba(255,255,255,.8);
+  border-radius:50%;
+  filter:blur(4px);
+  transform:rotate(-26deg);
+}
+.eye{
+  position:absolute;
+  width:12px;height:15px;
+  background:#17140c;
+  border-radius:50%;
+  top:32px;
+  transition:height .15s, top .15s;
+}
+.eye-l{left:26px}
+.eye-r{left:58px}
+.mouth{
+  position:absolute;
+  left:50%;top:56px;
+  width:26px;height:11px;
+  margin-left:-13px;
+  background:#17140c;
+  border-radius:0 0 26px 26px;
+  transition:all .18s cubic-bezier(.2,1.6,.4,1);
+}
+.verity.shouting .mouth{
+  width:24px;height:26px;
+  margin-left:-12px;
+  top:52px;
+  border-radius:50%;
+}
+
+/* ============ TRAIL ============ */
+.trail{
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+  z-index:5;
+  background:radial-gradient(circle,
+    rgba(255,214,10,.8) 0%,
+    rgba(255,214,10,.34) 46%,
+    rgba(255,214,10,0) 72%);
+  animation:trailFade .8s ease-out forwards;
+}
+@keyframes trailFade{
+  0%{opacity:1;transform:scale(1)}
+  100%{opacity:0;transform:scale(.5)}
+}
+
+/* ============ IMPACT RING ============ */
+.ring{
+  position:absolute;
+  width:24px;height:24px;
+  margin:-12px 0 0 -12px;
+  border-radius:50%;
+  border:4px solid var(--yellow);
+  pointer-events:none;
+  z-index:20;
+  animation:ringOut .65s ease-out forwards;
+}
+@keyframes ringOut{
+  0%{transform:scale(.4);opacity:1;border-width:6px}
+  100%{transform:scale(6.5);opacity:0;border-width:1px}
+}
+
+/* ============ SPARKLES ============ */
+.sparkle{
+  position:absolute;
+  width:13px;height:13px;
+  margin:-6.5px 0 0 -6.5px;
+  background:var(--yellow);
+  pointer-events:none;
+  z-index:20;
+  clip-path:polygon(50% 0%,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0% 50%,39% 39%);
+  animation:sparkleOut .85s ease-out forwards;
+}
+@keyframes sparkleOut{
+  0%{transform:translate(0,0) scale(0) rotate(0deg);opacity:0}
+  25%{opacity:1}
+  100%{transform:translate(var(--tx),var(--ty)) scale(.35) rotate(150deg);opacity:0}
+}
+
+/* ============ SHAKE ============ */
+.shake{animation:shake .62s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shake{
+  0%,100%{transform:translate3d(0,0,0)}
+  10%{transform:translate3d(-17px,11px,0) rotate(-.55deg)}
+  20%{transform:translate3d(15px,-13px,0) rotate(.5deg)}
+  30%{transform:translate3d(-13px,9px,0) rotate(-.4deg)}
+  40%{transform:translate3d(11px,-9px,0) rotate(.35deg)}
+  55%{transform:translate3d(-7px,5px,0) rotate(-.25deg)}
+  70%{transform:translate3d(5px,-4px,0) rotate(.15deg)}
+  85%{transform:translate3d(-3px,2px,0)}
+}
+
+/* ============ SPEECH BUBBLE ============ */
+.speech{
+  position:absolute;
+  left:0;top:0;
+  max-width:min(440px,80vw);
+  padding:18px 24px;
+  background:var(--yellow);
+  color:#14140f;
+  border-radius:18px;
+  font-family:'Archivo Black','Arial Black',sans-serif;
+  font-size:clamp(15px,2.4vw,24px);
+  line-height:1.18;
+  letter-spacing:.005em;
+  text-transform:uppercase;
+  z-index:40;
+  opacity:0;
+  transform:scale(.45);
+  transform-origin:27px 100%;
+  transition:opacity .16s ease, transform .36s cubic-bezier(.2,1.65,.4,1);
+  box-shadow:0 22px 46px -14px rgba(0,0,0,.75);
+  pointer-events:none;
+}
+.speech.show{opacity:1;transform:scale(1)}
+.speech.below{transform-origin:27px 0}
+.speech::after{
+  content:'';
+  position:absolute;
+  left:14px;top:100%;
+  width:0;height:0;
+  border-left:13px solid transparent;
+  border-right:13px solid transparent;
+  border-top:20px solid var(--yellow);
+}
+.speech.below::after{
+  top:auto;bottom:100%;
+  border-top:none;
+  border-bottom:20px solid var(--yellow);
+}
+
+/* ============ SCROLL CUE ============ */
+.scroll-cue{
+  position:absolute;
+  left:50%;bottom:26px;
+  transform:translateX(-50%) translateY(16px);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  font-size:11px;
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.38);
+  opacity:0;
+  transition:opacity .7s ease, transform .7s ease;
+}
+.scroll-cue.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.scroll-cue::after{
+  content:'';
+  width:1px;height:38px;
+  background:linear-gradient(var(--yellow),transparent);
+  animation:cueDrop 1.7s ease-in-out infinite;
+}
+@keyframes cueDrop{
+  0%,100%{transform:scaleY(.35);opacity:.35}
+  50%{transform:scaleY(1);opacity:1}
+}
+
+/* ============ CONTENT BELOW ============ */
+.more{
+  max-width:1000px;
+  margin:0 auto;
+  padding:90px 24px 140px;
+}
+.more h2{
+  font-family:'Archivo Black','Arial Black',sans-serif;
+  font-size:clamp(24px,4vw,44px);
+  text-transform:uppercase;
+  letter-spacing:-.02em;
+  margin:0 0 32px;
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:16px;
+}
+.card{
+  background:#16161d;
+  border:1px solid #23232e;
+  border-radius:16px;
+  padding:26px;
+  transition:border-color .3s, transform .3s;
+}
+.card:hover{border-color:rgba(255,214,10,.4);transform:translateY(-3px)}
+.card h3{margin:0 0 10px;font-size:15px;color:var(--yellow);letter-spacing:.06em;text-transform:uppercase}
+.card p{margin:0;color:rgba(255,255,255,.5);font-size:14px;line-height:1.65}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body class="locked">
+
+<section class="hero" id="hero">
+  <p class="eyebrow">welcome</p>
+  <h1 class="logo" id="logo">Multimedia <span class="dot">Club</span></h1>
+  <p class="sub">A place for people who make things with pixels, sound &amp; motion.</p>
+
+  <div class="verity" id="verity" aria-hidden="true">
+    <div class="verity-body" id="verityBody">
+      <span class="eye eye-l"></span>
+      <span class="eye eye-r"></span>
+      <span class="mouth"></span>
+    </div>
+  </div>
+
+  <div class="speech" id="speech" role="status" aria-live="polite">
+    <span id="speechText"></span>
+  </div>
+
+  <div class="scroll-cue" id="scrollCue">scroll</div>
+</section>
+
+<section class="more">
+  <h2>What we do</h2>
+  <div class="cards">
+    <div class="card"><h3>Film</h3><p>Short films, music videos and whatever else we can point a camera at.</p></div>
+    <div class="card"><h3>Design</h3><p>Posters, identities and interfaces made by people who care too much.</p></div>
+    <div class="card"><h3>Sound</h3><p>Original scores, foley, and the occasional very loud synth.</p></div>
+  </div>
+</section>
+
+<script>
+(function () {
+  'use strict';
+
+  const hero       = document.getElementById('hero');
+  const verity     = document.getElementById('verity');
+  const vBody      = document.getElementById('verityBody');
+  const logo       = document.getElementById('logo');
+  const speech     = document.getElementById('speech');
+  const speechText = document.getElementById('speechText');
+  const scrollCue  = document.getElementById('scrollCue');
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const wait = (ms) => new Promise(r => setTimeout(r, ms));
+
+  /* ---------- easing ---------- */
+  const easeOutCubic = t => 1 - Math.pow(1 - t, 3);
+
+  /* ---------- verity transform ---------- */
+  let vx = 0, vy = 0;
+  function setVerity(x, y, rot) {
+    vx = x; vy = y;
+    verity.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rot}deg)`;
+  }
+
+  function glideTo(x, y, ms, ease = 'cubic-bezier(.2,1.6,.4,1)') {
+    verity.style.transition = `transform ${ms}ms ${ease}`;
+    setVerity(x, y, 0);
+    return new Promise(res => setTimeout(() => {
+      verity.style.transition = '';
+      res();
+    }, ms));
+  }
+
+  function tween(from, to, duration, ease, onUpdate) {
+    return new Promise(resolve => {
+      const start = performance.now();
+      function frame(now) {
+        let p = (now - start) / duration;
+        if (p > 1) p = 1;
+        onUpdate(from + (to - from) * ease(p), p);
+        if (p < 1) requestAnimationFrame(frame);
+        else resolve();
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+
+  /* ---------- yellow trail ---------- */
+  let trailOn = false;
+  let lastTrail = 0;
+
+  function spawnTrail() {
+    const size = 60 + Math.random() * 55;
+    const d = document.createElement('div');
+    d.className = 'trail';
+    d.style.width  = size + 'px';
+    d.style.height = size + 'px';
+    d.style.left   = (vx - size / 2) + 'px';
+    d.style.top    = (vy - size / 2) + 'px';
+    hero.appendChild(d);
+    setTimeout(() => d.remove(), 850);
+  }
+
+  (function trailLoop(t) {
+    if (trailOn && t - lastTrail > 15) { lastTrail = t; spawnTrail(); }
+    requestAnimationFrame(trailLoop);
+  })(0);
+
+  /* ---------- effects ---------- */
+  function impactRing(x, y) {
+    const r = document.createElement('div');
+    r.className = 'ring';
+    r.style.left = x + 'px';
+    r.style.top  = y + 'px';
+    hero.appendChild(r);
+    setTimeout(() => r.remove(), 750);
+  }
+
+  function sparkleBurst(cx, cy) {
+    for (let i = 0; i < 7; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      const a = (Math.PI * 2 * i) / 7 + Math.random() * 0.6;
+      const r = 70 + Math.random() * 60;
+      s.style.left = cx + 'px';
+      s.style.top  = cy + 'px';
+      s.style.setProperty('--tx', Math.cos(a) * r + 'px');
+      s.style.setProperty('--ty', Math.sin(a) * r + 'px');
+      s.style.animationDelay = (Math.random() * 130) + 'ms';
+      hero.appendChild(s);
+      setTimeout(() => s.remove(), 1050);
+    }
+  }
+
+  /* ---------- speech bubble ---------- */
+  function showSpeech(text, ax, ay) {
+    speech.classList.remove('show');
+    speechText.textContent = text;
+
+    const w = speech.offsetWidth;
+    const h = speech.offsetHeight;
+    const vw = window.innerWidth;
+
+    let left = ax - 27;
+    left = Math.max(16, Math.min(left, vw - w - 16));
+    speech.style.left = left + 'px';
+
+    if (ay - 78 - h < 16) {          // not enough room above → put it below
+      speech.classList.add('below');
+      speech.style.top = (ay + 80) + 'px';
+    } else {
+      speech.classList.remove('below');
+      speech.style.top = (ay - 78 - h) + 'px';
+    }
+
+    void speech.offsetWidth;         // force reflow so the transition runs
+    speech.classList.add('show');
+  }
+
+  function hideSpeech() {
+    speech.classList.remove('show');
+  }
+
+  /* ---------- verity hop ---------- */
+  async function hop() {
+    const baseY = vy;
+    verity.style.transition = 'transform .16s ease-out';
+    setVerity(vx, baseY - 38, 0);
+    await wait(160);
+    verity.style.transition = 'transform .36s cubic-bezier(.3,1.7,.5,1)';
+    setVerity(vx, baseY, 0);
+    await wait(360);
+    verity.style.transition = '';
+  }
+
+  /* ================= MAIN SEQUENCE ================= */
+  async function playIntro() {
+    const heroRect = hero.getBoundingClientRect();
+    const logoRect = logo.getBoundingClientRect();
+
+    const lineY  = logoRect.top - heroRect.top + logoRect.height / 2;
+    const crashX = logoRect.left - heroRect.left - 30;
+    const restX  = crashX + 34;
+
+    // park off-screen left
+    setVerity(-180, lineY, 0);
+
+    /* --- 0. the totally normal welcome message --- */
+    await wait(1000);
+
+    verity.style.opacity = '1';
+    await wait(90);
+
+    /* --- 1. ROLL ACROSS THE SCREEN --- */
+    trailOn = true;
+    await tween(-180, crashX, 1150, easeOutCubic, (x) => {
+      setVerity(x, lineY, (x + 180) * 1.15);   // rolling rotation
+    });
+    trailOn = false;
+
+    /* --- 2. IMPACT --- */
+    const impactX = vx + 42;
+    const impactY = lineY;
+
+    hero.classList.add('shake');
+    setTimeout(() => hero.classList.remove('shake'), 660);
+
+    logo.classList.add('knocked');
+    impactRing(impactX, impactY);
+
+    // bounce back + snap upright
+    glideTo(restX, lineY, 520);
+
+    // squash & stretch
+    vBody.animate([
+      { transform: 'scale(1,1)' },
+      { transform: 'scale(1.38,.66)', offset: .18 },
+      { transform: 'scale(.86,1.16)', offset: .55 },
+      { transform: 'scale(1,1)' }
+    ], { duration: 580, easing: 'cubic-bezier(.3,1.5,.5,1)' });
+
+    await wait(430);
+
+    /* --- 3. THE SHOUT --- */
+    verity.classList.add('shouting');
+    showSpeech('HEY! STOP SCROLLING! YOU’RE SUPPOSED TO LOOK AT OUR WEBSITE!', vx, vy);
+
+    await wait(3400);
+    hideSpeech();
+    verity.classList.remove('shouting');
+
+    /* --- 4. FREEZE --- */
+    await wait(500);
+
+    /* --- 5. FIX THE LOGO --- */
+    verity.style.transition = 'transform .26s cubic-bezier(.3,1.4,.5,1)';
+    setVerity(restX + 30, lineY, 0);
+    await wait(200);
+
+    logo.classList.remove('knocked');            // springs back upright
+    sparkleBurst(logoRect.left - heroRect.left + logoRect.width / 2,
+                 logoRect.top  - heroRect.top  + logoRect.height / 2);
+
+    verity.style.transition = 'transform .5s cubic-bezier(.2,1.6,.4,1)';
+    setVerity(restX, lineY, 0);
+    await wait(520);
+    verity.style.transition = '';
+
+    /* --- 6. THE PROUD ANNOUNCEMENT --- */
+    await wait(200);
+    verity.classList.add('shouting');
+    hop();
+    await wait(180);
+    showSpeech('WELCOME TO THE MULTIMEDIA CLUB!', vx, vy);
+
+    await wait(3200);
+
+    /* --- 7. hand control back to the visitor --- */
+    hideSpeech();
+    document.body.classList.remove('locked');
+    scrollCue.classList.add('show');
+  }
+
+  /* ================= REDUCED MOTION FALLBACK ================= */
+  function staticEnding() {
+    const heroRect = hero.getBoundingClientRect();
+    const logoRect = logo.getBoundingClientRect();
+    const lineY  = logoRect.top - heroRect.top + logoRect.height / 2;
+    const restX  = logoRect.left - heroRect.left + 4;
+
+    verity.style.opacity = '1';
+    setVerity(restX, lineY, 0);
+    verity.classList.add('shouting');
+    showSpeech('WELCOME TO THE MULTIMEDIA CLUB!', restX, lineY);
+    document.body.classList.remove('locked');
+    scrollCue.classList.add('show');
+  }
+
+  /* ================= GO ================= */
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (REDUCED) staticEnding();
+      else playIntro();
+    }, 120);
+  });
+})();
+</script>
+</body>
+</html>
+<script src="/website-intros/js/intro-bridge.js"></script>

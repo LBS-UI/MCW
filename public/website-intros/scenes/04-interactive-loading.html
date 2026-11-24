@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multimedia Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --yellow:#FFD60A;
+  --yellow-deep:#FFB300;
+  --ink:#08080c;
+  --panel:#14141c;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--ink);
+  color:#fff;
+  font-family:'Space Grotesk',system-ui,-apple-system,sans-serif;
+  overflow-x:hidden;
+}
+body.locked{overflow:hidden;height:100vh}
+
+/* ================= BOOT OVERLAY ================= */
+.boot{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  background:
+    radial-gradient(60% 50% at 50% 45%, rgba(255,214,10,.10), transparent 72%),
+    radial-gradient(50% 44% at 82% 80%, rgba(120,80,255,.12), transparent 72%),
+    #08080c;
+  transition:opacity .7s ease, visibility .7s ease;
+}
+.boot::before{
+  content:'';
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(circle at 50% 50%, #000 30%, transparent 78%);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%, #000 30%, transparent 78%);
+  pointer-events:none;
+}
+.boot.done{opacity:0;visibility:hidden;pointer-events:none}
+
+.stage{
+  position:relative;
+  width:min(760px, 94vw);
+  z-index:2;
+}
+
+/* ---------- label ---------- */
+.boot-label{
+  display:flex;align-items:center;gap:6px;
+  font-size:clamp(10px,1.4vw,13px);
+  letter-spacing:.34em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.45);
+  font-weight:500;
+  margin-bottom:16px;
+}
+.caret{
+  display:inline-block;
+  color:var(--yellow);
+  animation:blink 1s steps(2,start) infinite;
+  font-size:.9em;
+}
+@keyframes blink{50%{opacity:0}}
+
+/* ---------- bar row ---------- */
+.bar-row{
+  display:flex;
+  align-items:flex-end;
+  gap:clamp(10px,3vw,26px);
+}
+.bar-col{flex:1;min-width:0}
+
+.bar-frame{
+  position:relative;
+  height:clamp(24px,4vw,32px);
+  border-radius:8px;
+  background:#101018;
+  border:2px solid #2a2a38;
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.7), 0 0 0 5px rgba(255,214,10,.045);
+  overflow:hidden;
+  will-change:transform;
+}
+.bar-fill{
+  position:absolute;
+  inset:0 auto 0 0;
+  width:0%;
+  border-radius:5px;
+  background:linear-gradient(180deg,#FFE566 0%, #FFD60A 46%, #FFB300 100%);
+  box-shadow:0 0 22px rgba(255,214,10,.55), inset 0 -4px 8px rgba(180,110,0,.35);
+  transition:width .12s linear;
+  overflow:hidden;
+}
+.bar-fill::after{
+  content:'';
+  position:absolute;inset:0;
+  background:linear-gradient(90deg, transparent 0%, rgba(255,255,255,.55) 50%, transparent 100%);
+  width:60%;
+  animation:shine 1.6s linear infinite;
+}
+@keyframes shine{
+  0%{transform:translateX(-120%)}
+  100%{transform:translateX(320%)}
+}
+.bar-ticks{
+  position:absolute;inset:0;
+  background-image:repeating-linear-gradient(90deg,
+    transparent 0,
+    transparent calc(10% - 2px),
+    rgba(8,8,12,.55) calc(10% - 2px),
+    rgba(8,8,12,.55) 10%);
+  pointer-events:none;
+}
+
+/* ---------- meta row ---------- */
+.bar-meta{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:12px;
+  font-size:clamp(11px,1.5vw,14px);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.4);
+}
+.pct{
+  font-family:'Archivo Black','Arial Black',sans-serif;
+  font-size:clamp(20px,4vw,34px);
+  letter-spacing:-.01em;
+  color:#fff;
+  font-variant-numeric:tabular-nums;
+  transition:color .3s ease;
+}
+.pct.done{color:var(--yellow);text-shadow:0 0 26px rgba(255,214,10,.65)}
+.hint{color:rgba(255,255,255,.3);transition:color .25s ease}
+.hint.hot{color:var(--yellow)}
+
+/* ================= VERITY ================= */
+.verity{
+  position:relative;
+  flex:none;
+  width:clamp(66px,11vw,96px);
+  height:clamp(66px,11vw,96px);
+  will-change:transform;
+  z-index:6;
+}
+.verity-shadow{
+  position:absolute;
+  left:50%;bottom:-12px;
+  width:82%;height:12px;
+  margin-left:-41%;
+  border-radius:50%;
+  background:radial-gradient(ellipse, rgba(0,0,0,.75), transparent 72%);
+  filter:blur(2px);
+  animation:shadowBob 2.6s ease-in-out infinite;
+}
+@keyframes shadowBob{
+  0%,100%{transform:scale(1);opacity:.7}
+  50%{transform:scale(.88);opacity:.45}
+}
+.verity-body{
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 26%,
+    #FFF7AE 0%, #FFD60A 42%, #FFB300 78%, #F09300 100%);
+  box-shadow:
+    inset -8px -12px 22px rgba(170,100,0,.35),
+    inset 7px 9px 18px rgba(255,255,255,.55),
+    0 0 0 6px rgba(255,214,10,.08),
+    0 22px 44px -14px rgba(255,190,0,.55);
+  animation:idleBob 2.6s ease-in-out infinite;
+}
+@keyframes idleBob{
+  0%,100%{transform:translateY(0) scale(1,1)}
+  50%{transform:translateY(-5px) scale(.98,1.02)}
+}
+.verity-body::after{
+  content:'';
+  position:absolute;
+  left:19%;top:13%;
+  width:28%;height:17%;
+  background:rgba(255,255,255,.82);
+  border-radius:50%;
+  filter:blur(4px);
+  transform:rotate(-26deg);
+}
+.eye{
+  position:absolute;
+  width:12%;height:16%;
+  background:#17140c;
+  border-radius:50%;
+  top:34%;
+  transition:height .16s ease, top .16s ease;
+}
+.eye-l{left:27%}
+.eye-r{left:59%}
+.mouth{
+  position:absolute;
+  left:50%;top:60%;
+  width:27%;height:11%;
+  margin-left:-13.5%;
+  background:#17140c;
+  border-radius:0 0 999px 999px;
+  transition:all .18s cubic-bezier(.2,1.6,.4,1);
+}
+.verity.shouting .mouth{
+  width:26%;height:26%;
+  margin-left:-13%;
+  top:55%;
+  border-radius:50%;
+}
+/* stubby arm that pops out when she taps */
+.verity-arm{
+  position:absolute;
+  left:-16%;top:44%;
+  width:30%;height:16%;
+  border-radius:999px;
+  background:linear-gradient(180deg,#FFE45C,#FFC400);
+  box-shadow:inset -3px -4px 7px rgba(170,100,0,.4);
+  transform-origin:100% 50%;
+  transform:scaleX(0);
+  transition:transform .12s ease;
+}
+.verity.arm .verity-arm{transform:scaleX(1)}
+
+/* ================= SPEECH BUBBLE ================= */
+.speech{
+  position:absolute;
+  right:-6px;
+  bottom:calc(100% + 16px);
+  width:max-content;
+  max-width:min(360px, 74vw);
+  padding:16px 20px;
+  background:var(--yellow);
+  color:#14140f;
+  border-radius:16px;
+  font-family:'Archivo Black','Arial Black',sans-serif;
+  font-size:clamp(13px,2.1vw,19px);
+  line-height:1.22;
+  text-transform:uppercase;
+  letter-spacing:.005em;
+  opacity:0;
+  transform:scale(.5) translateY(8px);
+  transform-origin:100% 100%;
+  transition:opacity .16s ease, transform .34s cubic-bezier(.2,1.65,.4,1);
+  box-shadow:0 20px 40px -14px rgba(0,0,0,.8);
+  pointer-events:none;
+  z-index:40;
+}
+.speech.show{opacity:1;transform:scale(1) translateY(0)}
+.speech::after{
+  content:'';
+  position:absolute;
+  right:26px;top:100%;
+  border-left:11px solid transparent;
+  border-right:11px solid transparent;
+  border-top:16px solid var(--yellow);
+}
+
+/* ================= FX ================= */
+.ring{
+  position:absolute;
+  width:22px;height:22px;
+  margin:-11px 0 0 -11px;
+  border-radius:50%;
+  border:4px solid var(--yellow);
+  pointer-events:none;
+  z-index:20;
+  animation:ringOut .6s ease-out forwards;
+}
+@keyframes ringOut{
+  0%{transform:scale(.4);opacity:1;border-width:6px}
+  100%{transform:scale(5.4);opacity:0;border-width:1px}
+}
+.spark{
+  position:absolute;
+  width:12px;height:12px;
+  margin:-6px 0 0 -6px;
+  background:var(--yellow);
+  pointer-events:none;
+  z-index:20;
+  clip-path:polygon(50% 0%,61% 39%,100% 50%,61% 61%,50% 100%,39% 61%,0% 50%,39% 39%);
+  animation:sparkOut .9s ease-out forwards;
+}
+@keyframes sparkOut{
+  0%{transform:translate(0,0) scale(0) rotate(0);opacity:0}
+  22%{opacity:1}
+  100%{transform:translate(var(--tx),var(--ty)) scale(.3) rotate(160deg);opacity:0}
+}
+.flash{
+  position:fixed;inset:0;
+  background:#fff;
+  opacity:0;
+  pointer-events:none;
+  z-index:150;
+}
+.flash.go{animation:flashOut .5s ease-out forwards}
+@keyframes flashOut{
+  0%{opacity:.85}
+  100%{opacity:0}
+}
+.stage.shake{animation:shake .6s cubic-bezier(.36,.07,.19,.97) both}
+@keyframes shake{
+  0%,100%{transform:translate3d(0,0,0)}
+  10%{transform:translate3d(-16px,10px,0) rotate(-.5deg)}
+  20%{transform:translate3d(14px,-12px,0) rotate(.45deg)}
+  30%{transform:translate3d(-12px,8px,0) rotate(-.35deg)}
+  40%{transform:translate3d(10px,-8px,0) rotate(.3deg)}
+  55%{transform:translate3d(-6px,5px,0) rotate(-.2deg)}
+  70%{transform:translate3d(4px,-3px,0) rotate(.12deg)}
+  85%{transform:translate3d(-2px,1px,0)}
+}
+
+/* ================= SITE ================= */
+.site{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:22px;
+  padding:80px 24px;
+  text-align:center;
+  position:relative;
+}
+.site::before{
+  content:'';
+  position:absolute;inset:0;
+  background:
+    radial-gradient(56% 46% at 50% 40%, rgba(255,214,10,.10), transparent 72%),
+    radial-gradient(46% 42% at 84% 82%, rgba(120,80,255,.12), transparent 72%);
+  pointer-events:none;
+}
+.site > *{position:relative}
+.site-eyebrow{
+  margin:0;
+  font-size:clamp(10px,1.3vw,13px);
+  letter-spacing:.45em;
+  text-transform:uppercase;
+  color:rgba(255,255,255,.4);
+}
+.site-logo{
+  margin:0;
+  font-family:'Archivo Black','Arial Black',sans-serif;
+  font-size:clamp(34px,8.4vw,96px);
+  line-height:.92;
+  letter-spacing:-.025em;
+  text-transform:uppercase;
+  color:#fff;
+}
+.site-logo .dot{color:var(--yellow)}
+.site-sub{
+  margin:0;
+  max-width:42ch;
+  font-size:clamp(13px,1.6vw,17px);
+  line-height:1.65;
+  color:rgba(255,255,255,.5);
+}
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:14px;
+  width:min(860px,100%);
+  margin-top:26px;
+}
+.card{
+  background:var(--panel);
+  border:1px solid #23232e;
+  border-radius:14px;
+  padding:24px;
+  text-align:left;
+  transition:border-color .3s, transform .3s, background .3s;
+}
+.card:hover{
+  border-color:rgba(255,214,10,.42);
+  transform:translateY(-4px);
+  background:#181822;
+}
+.card h3{
+  margin:0 0 9px;
+  font-size:13px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  color:var(--yellow);
+}
+.card p{margin:0;font-size:14px;line-height:1.65;color:rgba(255,255,255,.5)}
+
+/* reveal animation */
+.site .reveal{
+  opacity:0;
+  transform:translateY(22px) scale(.97);
+  transition:opacity .7s ease, transform .7s cubic-bezier(.2,1.3,.4,1);
+}
+.site.in .reveal{opacity:1;transform:none}
+.site.in .reveal:nth-child(1){transition-delay:.05s}
+.site.in .reveal:nth-child(2){transition-delay:.13s}
+.site.in .reveal:nth-child(3){transition-delay:.21s}
+.site.in .reveal:nth-child(4){transition-delay:.29s}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body class="locked">
+
+<!-- ============ BOOT / LOADING SCREEN ============ -->
+<div class="boot" id="boot">
+  <div class="stage" id="stage">
+
+    <div class="boot-label">
+      <span>Loading creativity</span>
+      <span class="caret">▍</span>
+    </div>
+
+    <div class="bar-row">
+      <div class="bar-col">
+        <div class="bar-frame" id="barFrame">
+          <div class="bar-fill" id="barFill"></div>
+          <div class="bar-ticks"></div>
+        </div>
+        <div class="bar-meta">
+          <span class="hint" id="hint">please wait…</span>
+          <span class="pct" id="pct">0%</span>
+        </div>
+      </div>
+
+      <!-- Verity stands to the right of the bar -->
+      <div class="verity" id="verity" aria-hidden="true">
+        <div class="verity-body">
+          <span class="verity-arm"></span>
+          <span class="eye eye-l"></span>
+          <span class="eye eye-r"></span>
+          <span class="mouth"></span>
+        </div>
+        <div class="verity-shadow"></div>
+        <div class="speech" id="speech" role="status" aria-live="polite">
+          <span id="speechText"></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="flash" id="flash"></div>
+
+<!-- ============ SITE ============ -->
+<main class="site" id="site">
+  <p class="site-eyebrow reveal">now open</p>
+  <h1 class="site-logo reveal">Multimedia <span class="dot">Club</span></h1>
+  <p class="site-sub reveal">A place for people who make things with pixels, sound &amp; motion.</p>
+
+  <div class="cards reveal">
+    <div class="card"><h3>Film</h3><p>Short films, music videos and whatever else we can point a camera at.</p></div>
+    <div class="card"><h3>Design</h3><p>Posters, identities and interfaces made by people who care too much.</p></div>
+    <div class="card"><h3>Sound</h3><p>Original scores, foley, and the occasional very loud synth.</p></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const boot       = document.getElementById('boot');
+  const stage      = document.getElementById('stage');
+  const barFrame   = document.getElementById('barFrame');
+  const barFill    = document.getElementById('barFill');
+  const pctEl      = document.getElementById('pct');
+  const hintEl     = document.getElementById('hint');
+  const verity     = document.getElementById('verity');
+  const speech     = document.getElementById('speech');
+  const speechText = document.getElementById('speechText');
+  const flash      = document.getElementById('flash');
+  const site       = document.getElementById('site');
+
+  const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+  /* ---------------- helpers ---------------- */
+
+  function setPct(v) {
+    const c = Math.max(0, Math.min(100, v));
+    barFill.style.width = c + '%';
+    pctEl.textContent = Math.round(c) + '%';
+    return c;
+  }
+
+  function tweenPct(from, to, dur, ease) {
+    ease = ease || (t => t);
+    return new Promise(resolve => {
+      const t0 = performance.now();
+      (function frame(now) {
+        let p = (now - t0) / dur;
+        if (p > 1) p = 1;
+        setPct(from + (to - from) * ease(p));
+        if (p < 1) requestAnimationFrame(frame);
+        else resolve();
+      })(performance.now());
+    });
+  }
+
+  function anim(el, frames, opts) {
+    const a = el.animate(frames, Object.assign({
+      duration: 300, easing: 'ease', fill: 'none'
+    }, opts || {}));
+    return a.finished.catch(() => {});
+  }
+
+  function speak(text) {
+    speechText.textContent = text;
+    speech.classList.add('show');
+  }
+  function hush() {
+    speech.classList.remove('show');
+  }
+
+  function fx(x, y, cls, life) {
+    const d = document.createElement('div');
+    d.className = cls;
+    d.style.left = x + 'px';
+    d.style.top  = y + 'px';
+    stage.appendChild(d);
+    setTimeout(() => d.remove(), life);
+  }
+
+  function barEndPoint() {
+    const s = stage.getBoundingClientRect();
+    const b = barFrame.getBoundingClientRect();
+    return { x: b.right - s.left, y: b.top - s.top + b.height / 2 };
+  }
+
+  function ring() {
+    const p = barEndPoint();
+    fx(p.x, p.y, 'ring', 700);
+  }
+
+  function sparks() {
+    const p = barEndPoint();
+    for (let i = 0; i < 9; i++) {
+      const s = document.createElement('div');
+      s.className = 'spark';
+      const a = (Math.PI * 2 * i) / 9 + Math.random() * 0.7;
+      const r = 60 + Math.random() * 80;
+      s.style.left = p.x + 'px';
+      s.style.top  = p.y + 'px';
+      s.style.setProperty('--tx', Math.cos(a) * r + 'px');
+      s.style.setProperty('--ty', Math.sin(a) * r + 'px');
+      s.style.animationDelay = (Math.random() * 120) + 'ms';
+      stage.appendChild(s);
+      setTimeout(() => s.remove(), 1100);
+    }
+  }
+
+  function bumpBar() {
+    anim(barFrame, [
+      { transform: 'translateX(0)' },
+      { transform: 'translateX(-5px)' },
+      { transform: 'translateX(2px)' },
+      { transform: 'translateX(0)' }
+    ], { duration: 240, easing: 'ease-out' });
+  }
+
+  /* ---------------- Verity actions ---------------- */
+
+  async function tap(targetPct) {
+    verity.classList.add('arm');
+
+    await anim(verity, [
+      { transform: 'translateX(0) rotate(0)' },
+      { transform: 'translateX(-30px) rotate(-11deg)' }
+    ], { duration: 170, easing: 'cubic-bezier(.4,0,.8,.4)' });
+
+    // moment of contact
+    setPct(targetPct);
+    bumpBar();
+    ring();
+
+    await anim(verity, [
+      { transform: 'translateX(-30px) rotate(-11deg)' },
+      { transform: 'translateX(-4px) rotate(5deg)' },
+      { transform: 'translateX(0) rotate(0)' }
+    ], { duration: 380, easing: 'cubic-bezier(.2,1.6,.4,1)' });
+
+    verity.classList.remove('arm');
+  }
+
+  async function windUp() {
+    const a = verity.animate([
+      { transform: 'translateX(0) rotate(0) scale(1,1)' },
+      { transform: 'translateX(30px) rotate(17deg) scale(1.05,.95)' }
+    ], { duration: 430, easing: 'cubic-bezier(.45,0,.7,.4)', fill: 'forwards' });
+    await a.finished;
+    verity.classList.add('arm');
+    await wait(160);
+    return a;
+  }
+
+  async function smack(windUpAnim) {
+    const slam = verity.animate([
+      { transform: 'translateX(30px) rotate(17deg) scale(1.05,.95)', offset: 0 },
+      { transform: 'translateX(-64px) rotate(-19deg) scale(1.18,.86)', offset: .34 },
+      { transform: 'translateX(-30px) rotate(-6deg) scale(.96,1.06)', offset: .63 },
+      { transform: 'translateX(0) rotate(0) scale(1,1)', offset: 1 }
+    ], { duration: 780, easing: 'cubic-bezier(.3,.9,.4,1)', fill: 'forwards' });
+
+    await wait(262);          // impact frame
+
+    stage.classList.add('shake');
+    setTimeout(() => stage.classList.remove('shake'), 620);
+
+    flash.classList.add('go');
+    setTimeout(() => flash.classList.remove('go'), 520);
+
+    ring();
+    sparks();
+    bumpBar();
+
+    await slam.finished;
+
+    windUpAnim.cancel();
+    slam.cancel();
+    verity.style.transform = '';
+    verity.classList.remove('arm');
+  }
+
+  /* ---------------- finish ---------------- */
+
+  function finish() {
+    boot.classList.add('done');
+    document.body.classList.remove('locked');
+    site.classList.add('in');
+    setTimeout(() => { boot.style.display = 'none'; }, 850);
+  }
+
+  /* ---------------- main sequence ---------------- */
+
+  async function run() {
+    setPct(37);
+    await wait(850);
+
+    // the painfully slow creep
+    const creep = tweenPct(37, 38, 2300, t => t);
+    speak('Loading creativity… 37%… 38%…');
+    await creep;
+    await wait(1200);
+    hush();
+
+    await wait(220);
+    speak('This is taking FOREVER.');
+    hintEl.classList.add('hot');
+    hintEl.textContent = '!!!';
+    await wait(1250);
+    hush();
+    await wait(180);
+
+    // tap 1
+    await tap(39);
+    await wait(600);
+
+    // tap 2
+    speak('C’mon…');
+    await wait(850);
+    hush();
+    await wait(150);
+    await tap(40);
+    await wait(420);
+
+    // fed up
+    speak('UGH, LET ME HANDLE THIS!');
+    verity.classList.add('shouting');
+    await wait(1350);
+    hush();
+    verity.classList.remove('shouting');
+    await wait(200);
+
+    // windup + smack
+    const w = await windUp();
+    await smack(w);
+
+    // bar rockets to 100
+    await tweenPct(40, 100, 850, easeOut);
+    sparks();
+
+    hintEl.textContent = 'READY!';
+    pctEl.classList.add('done');
+
+    await wait(950);
+    finish();
+  }
+
+  /* ---------------- reduced motion / fallback ---------------- */
+
+  function staticEnding() {
+    setPct(100);
+    pctEl.classList.add('done');
+    hintEl.textContent = 'READY!';
+    setTimeout(finish, 500);
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      if (REDUCED) staticEnding();
+      else run();
+    }, 150);
+  });
+
+  // safety net: never trap the visitor on the loading screen
+  setTimeout(() => {
+    if (!boot.classList.contains('done')) {
+      setPct(100);
+      finish();
+    }
+  }, 20000);
+
+})();
+</script>
+</body>
+</html>
+<script src="/website-intros/js/intro-bridge.js"></script>

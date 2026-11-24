@@ -1103,6 +1103,17 @@ body.light-mode .showcase-3d .contact-shadow { opacity: .4; }
 </head>
 <body class="text-white antialiased">
 
+<div id="mmc-intro" style="position:fixed;inset:0;z-index:20000;background:#050505;display:flex;align-items:center;justify-content:center;overflow:hidden">
+  <div style="text-align:center;padding:24px">
+    <img src="verity-faces/idle.jpg" alt="Verity" style="width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid #FFD700;box-shadow:0 0 40px rgba(255,215,0,.45)">
+    <h1 style="margin:18px 0 8px;font-size:clamp(28px,6vw,52px);letter-spacing:.12em;color:#FFD700">MULTIMEDIA CLUB</h1>
+    <p style="margin:0;color:#fffbea;font-size:18px">Oh! You're finally here. Welcome to Multimedia Club.</p>
+  </div>
+  <div style="position:absolute;right:16px;bottom:16px;display:flex;gap:8px">
+    <button type="button" onclick="window.MMCIntro && MMCIntro.skip()" style="padding:10px 14px;border-radius:999px;border:1px solid #FFD700;background:#050505;color:#FFD700;font-weight:700;cursor:pointer">Skip intro</button>
+  </div>
+</div>
+
 <!-- DEDICATED QR SCAN PAGE -->
 <div id="qr-profile-page">
     <!-- Background Elements -->
@@ -4720,6 +4731,31 @@ function closePublicPage() {
 })();
 </script>
 
+<script>
+(function () {
+  var overlay = document.getElementById("mmc-intro");
+  function hide() {
+    if (overlay) overlay.remove();
+    document.body.style.overflow = "";
+    if (window.offerVerityTour) window.offerVerityTour();
+  }
+  function skipped() {
+    try { localStorage.setItem("mmc_intro_skip", "1"); } catch (e) {}
+    hide();
+  }
+  window.MMCIntro = { skip: hide, alwaysSkip: skipped };
+  var skip = false;
+  try { skip = localStorage.getItem("mmc_intro_skip") === "1"; } catch (e) {}
+  if (skip || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    hide();
+    return;
+  }
+  document.body.style.overflow = "hidden";
+  var loader = document.getElementById("loading-screen");
+  if (loader) loader.style.display = "none";
+  setTimeout(hide, 7000);
+})();
+</script>
 <script src="/website-intros/js/intro-manager.js"></script>
 </body>
 </html>

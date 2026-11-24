@@ -86,7 +86,6 @@
   });
   window.MMCIntro = { play: play, skip: cleanup, alwaysSkip: setAlwaysSkip, config: CONFIG };
   document.addEventListener("DOMContentLoaded", function () {
-    var scene = choose();
-    if (scene) play(scene);
+    return;
   });
 })();

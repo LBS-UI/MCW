@@ -117,19 +117,13 @@ a{color:inherit}
 /* Verity sprite slot — swap the CSS fallback for your own art */
 .sprite{
   width:clamp(62px,12vmin,92px);aspect-ratio:1;border-radius:50%;position:relative;
-  background:radial-gradient(circle at 36% 30%,
-      #fff6e6 0%,#ffd79a 28%,#f5a623 62%,#a9660f 100%);
+  background:url("/verity-faces/idle.jpg") center/cover no-repeat;
   box-shadow:0 0 40px rgba(245,166,35,.55),
              0 0 100px rgba(245,166,35,.22),
              inset 0 -9px 20px rgba(110,60,4,.5);
   animation:hover 3.6s ease-in-out 5s infinite;
 }
-.sprite::before,.sprite::after{
-  content:"";position:absolute;top:42%;width:9%;height:15%;border-radius:50%;
-  background:#231506;
-}
-.sprite::before{left:31%}
-.sprite::after{right:31%}
+.sprite::before,.sprite::after{display:none}
 @keyframes hover{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
 .skip{
@@ -459,6 +453,7 @@ footer small{color:#6f6455;font-size:12.5px;letter-spacing:.08em}
   if (!reduced) requestAnimationFrame(loop);
 })();
 </script>
+
+<script src="/website-intros/js/intro-bridge.js"></script>
 </body>
 </html>
-<script src="/website-intros/js/intro-bridge.js"></script>

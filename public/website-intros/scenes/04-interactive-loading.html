@@ -176,11 +176,8 @@ body.locked{overflow:hidden;height:100vh}
   position:absolute;
   inset:0;
   border-radius:50%;
-  background:radial-gradient(circle at 34% 26%,
-    #FFF7AE 0%, #FFD60A 42%, #FFB300 78%, #F09300 100%);
+  background:url("/verity-faces/idle.jpg") center/cover no-repeat;
   box-shadow:
-    inset -8px -12px 22px rgba(170,100,0,.35),
-    inset 7px 9px 18px rgba(255,255,255,.55),
     0 0 0 6px rgba(255,214,10,.08),
     0 22px 44px -14px rgba(255,190,0,.55);
   animation:idleBob 2.6s ease-in-out infinite;
@@ -199,7 +196,7 @@ body.locked{overflow:hidden;height:100vh}
   filter:blur(4px);
   transform:rotate(-26deg);
 }
-.eye{
+.eye{display:none;
   position:absolute;
   width:12%;height:16%;
   background:#17140c;
@@ -209,7 +206,7 @@ body.locked{overflow:hidden;height:100vh}
 }
 .eye-l{left:27%}
 .eye-r{left:59%}
-.mouth{
+.mouth{display:none;
   position:absolute;
   left:50%;top:60%;
   width:27%;height:11%;
@@ -218,7 +215,7 @@ body.locked{overflow:hidden;height:100vh}
   border-radius:0 0 999px 999px;
   transition:all .18s cubic-bezier(.2,1.6,.4,1);
 }
-.verity.shouting .mouth{
+.verity.shouting .mouth{display:none;
   width:26%;height:26%;
   margin-left:-13%;
   top:55%;
@@ -732,6 +729,7 @@ body.locked{overflow:hidden;height:100vh}
 
 })();
 </script>
+
+<script src="/website-intros/js/intro-bridge.js"></script>
 </body>
 </html>
-<script src="/website-intros/js/intro-bridge.js"></script>

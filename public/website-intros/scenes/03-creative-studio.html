@@ -352,11 +352,8 @@ body.locked{overflow:hidden;height:100vh}
 .v-body{
   position:absolute; inset:0;
   border-radius:50%;
-  background:radial-gradient(circle at 34% 26%,
-    #FFF7AE 0%, #FFD60A 42%, #FFB300 78%, #F09300 100%);
+  background:url("/verity-faces/idle.jpg") center/cover no-repeat;
   box-shadow:
-    inset -8px -12px 22px rgba(170,100,0,.35),
-    inset 7px 9px 18px rgba(255,255,255,.55),
     0 0 44px rgba(255,214,10,.3),
     0 0 0 6px rgba(255,214,10,.07);
   animation:idle 2.8s ease-in-out infinite;
@@ -375,7 +372,7 @@ body.locked{overflow:hidden;height:100vh}
   filter:blur(4px);
   transform:rotate(-26deg);
 }
-.eye{
+.eye{display:none;
   position:absolute;
   width:12%; height:16%;
   background:#17140c;
@@ -385,7 +382,7 @@ body.locked{overflow:hidden;height:100vh}
 }
 .eye-l{left:27%}
 .eye-r{left:59%}
-.mouth{
+.mouth{display:none;
   position:absolute;
   left:50%; top:60%;
   width:27%; height:11%;
@@ -394,8 +391,8 @@ body.locked{overflow:hidden;height:100vh}
   border-radius:0 0 999px 999px;
   transition:all .2s cubic-bezier(.2,1.6,.4,1);
 }
-.verity.ready .eye{top:38%;height:14%}
-.verity.press .mouth{width:19%;height:6%;border-radius:3px;margin-left:-9.5%}
+.verity.ready .eye{display:none;top:38%;height:14%}
+.verity.press .mouth{display:none;width:19%;height:6%;border-radius:3px;margin-left:-9.5%}
 
 .v-arm{
   position:absolute;
@@ -1029,6 +1026,7 @@ body.locked{overflow:hidden;height:100vh}
 
 })();
 </script>
+
+<script src="/website-intros/js/intro-bridge.js"></script>
 </body>
 </html>
-<script src="/website-intros/js/intro-bridge.js"></script>
